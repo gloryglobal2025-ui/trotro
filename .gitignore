@@ -1,0 +1,18 @@
+# Local tooling / binaries (not part of the project)
+/php/
+/php.zip
+/vc_redist.x64.exe
+/composer-setup.php
+/.devin/
+/release/
+
+# Agent / editor scratch
+.claude/
+.mcp.json
+.idea/
+.vscode/
+*.log
+
+# OS noise
+.DS_Store
+Thumbs.db

@@ -1,0 +1,11 @@
+# Defense in depth: if Apache is pointed at the project root instead of public/,
+# block direct access to everything except the public directory.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^public/ - [L]
+    RewriteRule ^ - [F,L]
+</IfModule>
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
