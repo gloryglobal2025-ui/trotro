@@ -13,11 +13,11 @@ import 'session_store.dart';
 
 class ApiService {
   // Override at build time:
-  // flutter build apk --dart-define=API_BASE_URL=https://test2.digitalsecuritymarket.com/api
+  // flutter build apk --dart-define=API_BASE_URL=https://trotro.digitalsecuritymarket.com/api
   // 10.0.2.2 is the Android emulator's host machine.
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://trotro.digitalsecuritymarket.com/public',
+    defaultValue: 'https://trotro.digitalsecuritymarket.com/api',
   );
 
   static String? _authToken;
