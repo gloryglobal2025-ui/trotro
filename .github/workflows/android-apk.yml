@@ -11,7 +11,7 @@ on:
       api_base_url:
         description: API base URL baked into the app
         required: false
-        default: https://test2.digitalsecuritymarket.com/api
+        default: https://trotro.digitalsecuritymarket.com/public
 
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -45,7 +45,7 @@ jobs:
 
       - name: Build release APK
         env:
-          API_BASE_URL: ${{ inputs.api_base_url || 'https://test2.digitalsecuritymarket.com/api' }}
+          API_BASE_URL: ${{ inputs.api_base_url || 'https://trotro.digitalsecuritymarket.com/public' }}
         run: flutter build apk --release --dart-define=API_BASE_URL="$API_BASE_URL"
 
       - uses: actions/upload-artifact@v4
