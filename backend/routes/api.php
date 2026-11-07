@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::patch('/auth/profile', [AuthController::class, 'updateProfile']);
     Route::post('/auth/photo', [AuthController::class, 'uploadPhoto']);
+    Route::post('/auth/driver-verification', [AuthController::class, 'submitDriverVerification']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     Route::get('/rides/available', [RideController::class, 'availableRides']);

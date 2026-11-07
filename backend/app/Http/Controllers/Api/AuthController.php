@@ -120,4 +120,60 @@ class AuthController extends Controller
             'profile_image_url' => $user->profile_image_url,
         ]);
     }
+
+    public function submitDriverVerification(Request $request)
+    {
+        $user = $request->user();
+
+        if (! $user->isDriver()) {
+            return response()->json(['message' => 'Only drivers can submit verification documents.'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'license_number' => 'required|string|max:50',
+            'license_expiry' => 'required|date|after:today',
+            'ghana_card_number' => 'required|string|max:50',
+            'license_image' => [
+                $user->license_image ? 'nullable' : 'required',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:4096',
+            ],
+            'ghana_card_image' => [
+                $user->ghana_card_image ? 'nullable' : 'required',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:4096',
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = [
+            'license_number' => $request->input('license_number'),
+            'license_expiry' => $request->input('license_expiry'),
+            'ghana_card_number' => $request->input('ghana_card_number'),
+            'verification_status' => 'pending',
+            'verification_notes' => null,
+            'verification_submitted_at' => now(),
+            'verified_at' => null,
+            'verified_by' => null,
+        ];
+
+        foreach (['license_image', 'ghana_card_image'] as $field) {
+            if ($request->hasFile($field)) {
+                Image::delete($user->{$field});
+                $data[$field] = Image::store($request->file($field), 'drivers');
+            }
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'user' => $user->fresh()->load('vehicle'),
+            'message' => 'Documents submitted. An administrator will review your account shortly.',
+        ]);
+    }
 }

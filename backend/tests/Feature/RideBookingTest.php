@@ -6,6 +6,8 @@ use App\Models\Ride;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RideBookingTest extends TestCase
@@ -110,10 +112,12 @@ class RideBookingTest extends TestCase
 
     public function test_driver_can_register_vehicle(): void
     {
+        Storage::fake('public');
+
         $driver = User::factory()->create(['role' => 'driver']);
         $token = $driver->createToken('test-token')->plainTextToken;
 
-        $response = $this->withToken($token)->postJson('/api/vehicles', [
+        $response = $this->withToken($token)->post('/api/vehicles', [
             'make' => 'Toyota',
             'model' => 'Corolla',
             'year' => 2020,
@@ -121,6 +125,9 @@ class RideBookingTest extends TestCase
             'color' => 'White',
             'capacity' => 4,
             'vehicle_type' => 'sedan',
+            'vehicle_image' => UploadedFile::fake()->image('vehicle.jpg'),
+            'registration_image' => UploadedFile::fake()->image('registration.jpg'),
+            'roadworthy_image' => UploadedFile::fake()->image('roadworthy.jpg'),
         ]);
 
         $response->assertStatus(201)
@@ -130,11 +137,15 @@ class RideBookingTest extends TestCase
                 'make',
                 'model',
                 'license_plate',
-            ]);
+            ])
+            ->assertJsonPath('request_status', 'pending')
+            ->assertJsonPath('is_active', false);
 
         $this->assertDatabaseHas('vehicles', [
             'driver_id' => $driver->id,
             'license_plate' => 'GW-1234-20',
+            'request_status' => 'pending',
+            'is_active' => false,
         ]);
     }
 
@@ -187,7 +198,10 @@ class RideBookingTest extends TestCase
 
     public function test_driver_can_accept_a_pending_ride(): void
     {
-        $driver = User::factory()->create(['role' => 'driver']);
+        $driver = User::factory()->create([
+            'role' => 'driver',
+            'verification_status' => 'approved',
+        ]);
         $passenger = User::factory()->create(['role' => 'passenger']);
         $token = $driver->createToken('test-token')->plainTextToken;
 

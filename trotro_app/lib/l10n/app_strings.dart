@@ -74,8 +74,8 @@ class AppStrings {
   String get passwordHint =>
       _t('Use at least 8 characters', 'Fa nsɛnkyerɛnne 8 anaa nea ɛboro saa');
   String get driverNote => _t(
-        'You will add your vehicle details from the driver dashboard after signing in.',
-        'Wobɛka wo kar nsɛm ho wɔ driver dashboard so wɔ akyi a woakɔ mu.',
+        'After signing in, add your licence, Ghana Card and vehicle from the driver dashboard.',
+        'Woakɔ mu a, ka wo licence, Ghana Card ne kar ho nsɛm wɔ driver dashboard so.',
       );
   String get secureFooter => _t('Secure sign-in · Trotro', 'Banbɔ mu kɔ mu · Trotro');
   String get showPassword => _t('Show password', 'Kyerɛ password');
@@ -305,6 +305,163 @@ class AppStrings {
         return _t('Trip cancelled', 'Wɔagyae akwantu no');
       default:
         return _t('Looking for a driver', 'Yɛrehwehwɛ driver');
+    }
+  }
+
+  // Driver verification & vehicle onboarding
+  String get driverVerification =>
+      _t('Driver verification', 'Driver nsɛm hwɛ');
+  String get verificationIntro => _t(
+        'Add your driver licence, Ghana Card and photos. An admin reviews them before you can take rides.',
+        'Fa wo driver licence, Ghana Card ne mfonini. Admin hwɛ so ansa na woatumi agye akwantu.',
+      );
+  String get licenseDetails => _t('Driver licence', 'Driver licence');
+  String get licenseNumber => _t('Licence number', 'Licence nɔma');
+  String get enterLicenseNumber =>
+      _t('Enter your licence number', 'Kyerɛw wo licence nɔma');
+  String get licenseExpiry => _t('Licence expiry', 'Licence bɛdii da');
+  String get enterLicenseExpiry =>
+      _t('Choose the expiry date', 'Paw da a ɛbɛdii');
+  String get licensePhoto => _t('Licence photo', 'Licence mfonini');
+  String get ghanaCardDetails => _t('Ghana Card', 'Ghana Card');
+  String get ghanaCardNumber => _t('Ghana Card number', 'Ghana Card nɔma');
+  String get enterGhanaCardNumber =>
+      _t('Enter your Ghana Card number', 'Kyerɛw wo Ghana Card nɔma');
+  String get ghanaCardPhoto => _t('Ghana Card photo', 'Ghana Card mfonini');
+  String get choosePhoto => _t('Choose photo', 'Paw mfonini');
+  String get changePhotoShort => _t('Change', 'Sesa');
+  String get addPhoto => _t('Add photo', 'Ka mfonini');
+  String get documentTooLarge => _t(
+        'That photo is too large. Pick one under 4 MB.',
+        'Mfonini no kɛse dodo. Paw bi a ɛwɔ ase 4 MB.',
+      );
+  String get photoPickFailedRetry => _t(
+        'Could not open your photos. Try again.',
+        'Yɛantumi anyi mfonini. Sɔ hwɛ bio.',
+      );
+  String get photoNeeded => _t(
+        'Add this photo to continue.',
+        'Ka mfonini yi ansa na wɔakɔ so.',
+      );
+  String get submitForReview => _t('Send for review', 'Soma ma wɔnhwɛ');
+  String get submittingReview => _t('Sending…', 'Ɛrekɔ…');
+  String get verificationSubmitted => _t(
+        'Your documents were sent. Waiting for approval.',
+        'Wɔasoma wo nsɛm. Yɛretwɛn gyidie.',
+      );
+  String get verificationSubmitFailed => _t(
+        'Could not send your documents. Check your connection and try again.',
+        'Yɛantumi ansoma wo nsɛm. Hwɛ intanɛt na sɔ hwɛ bio.',
+      );
+  String get verificationUnverified =>
+      _t('Not verified yet', 'Wɔnnhyɛɛ wo nso');
+  String get verificationPending =>
+      _t('Waiting for approval', 'Yɛretwɛn gyidie');
+  String get verificationApproved => _t('Verified', 'Wɔagye wo tom');
+  String get verificationRejected => _t('Needs changes', 'Ɛhia nsakraeɛ');
+  String get verificationPendingNote => _t(
+        'Your documents are with an admin. You can change them after a decision.',
+        'Wo nsɛm wɔ admin nkyɛn. Wobɛtumi asesa wɔwie gyidie akyi.',
+      );
+  String get verificationApprovedNote => _t(
+        'Your driver account is verified.',
+        'Wɔagye wo driver akontaabu tom.',
+      );
+  String get verificationRejectedNote => _t(
+        'Fix the issue below and send your documents again.',
+        'Siesie asɛm a ɛwɔ ase ha na soma wo nsɛm bio.',
+      );
+  String get adminNote => _t('Admin note', 'Admin nsɛm');
+  String get licenseExpiredError => _t(
+        'Choose a licence expiry date in the future.',
+        'Paw da a licence bɛdii a ɛwɔ daakye.',
+      );
+  String get requiredField => _t('This is required', 'Eyi hia');
+
+  String verificationStatusLabel(String status) {
+    switch (status) {
+      case 'approved':
+        return verificationApproved;
+      case 'pending':
+        return verificationPending;
+      case 'rejected':
+        return verificationRejected;
+      default:
+        return verificationUnverified;
+    }
+  }
+
+  String get myVehicle => _t('My vehicle', 'Me kar');
+  String get addVehicle => _t('Add your vehicle', 'Ka wo kar');
+  String get editVehicle => _t('Edit vehicle', 'Sesa kar');
+  String get vehicleIntro => _t(
+        'Add your trotro, registration and roadworthy papers. An admin reviews them before you can go online.',
+        'Ka wo trotro, registration ne roadworthy krataa. Admin hwɛ so ansa na woatumi abɛyɛ adwuma.',
+      );
+  String get vehicleMake => _t('Make', 'Kar din');
+  String get vehicleModel => _t('Model', 'Model');
+  String get vehicleYear => _t('Year', 'Afe');
+  String get vehiclePlate => _t('Licence plate', 'Kar nɔma');
+  String get vehicleColor => _t('Colour', 'Kɔla');
+  String get vehicleCapacity => _t('Seats', 'Ntea');
+  String get vehicleType => _t('Vehicle type', 'Kar su');
+  String get vehiclePhoto =>
+      _t('Vehicle photo', 'Kar mfonini');
+  String get registrationPhoto =>
+      _t('Registration paper', 'Registration krataa');
+  String get roadworthyPhoto =>
+      _t('Roadworthy certificate', 'Roadworthy krataa');
+  String get vehicleSubmitted => _t(
+        'Your vehicle was sent. Waiting for approval.',
+        'Wɔasoma wo kar. Yɛretwɛn gyidie.',
+      );
+  String get vehicleSubmitFailed => _t(
+        'Could not send your vehicle. Check your connection and try again.',
+        'Yɛantumi ansoma wo kar. Hwɛ intanɛt na sɔ hwɛ bio.',
+      );
+  String get vehiclePendingNote => _t(
+        'Your vehicle is with an admin for review.',
+        'Wo kar wɔ admin nkyɛn na ɔrehwɛ.',
+      );
+  String get vehicleStatusApproved => _t('Vehicle approved', 'Wɔagye kar tom');
+  String get vehicleStatusPending =>
+      _t('Vehicle waiting for approval', 'Kar retwɛn gyidie');
+  String get vehicleStatusRejected =>
+      _t('Vehicle needs changes', 'Kar hia nsakraeɛ');
+  String get vehicleDocuments =>
+      _t('Photos and papers', 'Mfonini ne krataa');
+  String get vehicleApprovedNote => _t(
+        'Your vehicle is approved. You can go online.',
+        'Wɔagye wo kar tom. Wobɛtumi abɛyɛ adwuma.',
+      );
+  String get vehicleRejectedNote => _t(
+        'Fix the issue below and send your vehicle again.',
+        'Siesie asɛm a ɛwɔ ase ha na soma wo kar bio.',
+      );
+  String get vehicleNeeded => _t(
+        'Add a vehicle and get it approved before going online.',
+        'Ka kar na ma wɔngye tom ansa na woabɛyɛ adwuma.',
+      );
+  String get onlineBlocked => _t(
+        'Finish verification and vehicle approval to go online.',
+        'Wie nsɛm hwɛ ne kar gyidie ansa na woabɛyɛ adwuma.',
+      );
+  String get readyToDrive =>
+      _t('You are ready to take rides', 'Woasiesie wo ho ma akwantu');
+  String get verificationStep => _t('Step 1 · Verify you', 'Step 1 · Hwɛ wo');
+  String get vehicleStep => _t('Step 2 · Your vehicle', 'Step 2 · Wo kar');
+  String get completeSetup => _t('Finish setup', 'Wie nhyehyɛeɛ');
+
+  String vehicleTypeLabel(String type) {
+    switch (type) {
+      case 'suv':
+        return _t('SUV', 'SUV');
+      case 'minivan':
+        return _t('Minivan / Trotro', 'Minivan / Trotro');
+      case 'bus':
+        return _t('Bus', 'Bus');
+      default:
+        return _t('Car', 'Kar');
     }
   }
 

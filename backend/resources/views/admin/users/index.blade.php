@@ -6,9 +6,17 @@
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">User Management</h1>
-        <a href="{{ route('admin.users.create') }}" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
-            + Add User
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('admin.users.verification-requests') }}" class="relative bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-50">
+                Driver Verification
+                @if(($pendingVerifications ?? 0) > 0)
+                <span class="ml-2 inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full bg-red-600 text-white text-xs font-bold">{{ $pendingVerifications }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.users.create') }}" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                + Add User
+            </a>
+        </div>
     </div>
 
     <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -48,6 +56,20 @@
                             {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-800' : ($user->role === 'driver' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800') }}">
                             {{ ucfirst($user->role) }}
                         </span>
+                        @if($user->role === 'driver')
+                            @php
+                                $verificationStyles = [
+                                    'approved' => 'bg-green-100 text-green-800',
+                                    'pending' => 'bg-yellow-100 text-yellow-800',
+                                    'rejected' => 'bg-red-100 text-red-800',
+                                    'unverified' => 'bg-gray-100 text-gray-600',
+                                ];
+                                $verificationStatus = $user->verification_status ?? 'unverified';
+                            @endphp
+                            <span class="mt-1 block px-2 py-0.5 w-max text-xs font-semibold rounded-full {{ $verificationStyles[$verificationStatus] ?? $verificationStyles['unverified'] }}">
+                                {{ ucfirst($verificationStatus) }}
+                            </span>
+                        @endif
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {{ $user->userLevel?->name ?? 'N/A' }}
@@ -79,6 +101,10 @@
     {{ $users->links() }}
 
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="{{ route('admin.users.verification-requests') }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md">
+            <h3 class="font-semibold text-gray-800">Driver Verification</h3>
+            <p class="text-sm text-gray-500 mt-1">Review licences, Ghana Cards and vehicle papers</p>
+        </a>
         <a href="{{ route('admin.users.driver-levels') }}" class="bg-white p-4 rounded-lg shadow hover:shadow-md">
             <h3 class="font-semibold text-gray-800">Driver Levels</h3>
             <p class="text-sm text-gray-500 mt-1">Manage driver tiers and commissions</p>

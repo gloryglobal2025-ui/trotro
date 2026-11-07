@@ -5,9 +5,11 @@ import '../models/ride.dart';
 import '../models/vehicle.dart';
 import '../models/user.dart';
 import '../models/wallet.dart';
+import '../l10n/app_strings.dart';
 import 'trip_tracking_screen.dart';
 import 'wallet_screen.dart';
 import 'qr_pass_screen.dart';
+import 'add_vehicle_screen.dart';
 import '../services/app_settings.dart';
 import '../widgets/photo_tile.dart';
 import '../services/tts_service.dart';
@@ -26,7 +28,7 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
   Vehicle? _myVehicle;
   User? _driver;
   bool _isLoading = true;
-  bool _isOnline = true;
+  bool _isOnline = false;
   int _selectedIndex = 0;
   Wallet? _wallet;
   double _todayEarnings = 0.0;
@@ -73,6 +75,10 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
         _todayEarnings = paidToday.fold(0.0, (sum, ride) => sum + (ride.fareAmount ?? 0.0));
         _wallet = wallet;
         _rating = user.rating;
+        final vehicleApproved = _myVehicle?.requestStatus == 'approved';
+        if (!user.isVerifiedDriver || !vehicleApproved) {
+          _isOnline = false;
+        }
         _isLoading = false;
       });
 
@@ -102,7 +108,48 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
     }
   }
 
+  bool get _verificationApproved => _driver?.isVerifiedDriver ?? false;
+
+  bool get _vehicleApproved => _myVehicle?.requestStatus == 'approved';
+
+  bool get _canTakeRides => _verificationApproved && _vehicleApproved;
+
+  Future<void> _openVerification() async {
+    final changed = await Navigator.pushNamed(context, '/driver-verification');
+    if (changed == true && mounted) _loadData();
+  }
+
+  Future<void> _openVehicle() async {
+    final changed = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddVehicleScreen(vehicle: _myVehicle),
+      ),
+    );
+    if (changed == true && mounted) _loadData();
+  }
+
+  void _showSetupRequired() {
+    final s = AppSettings.instance.strings;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(s.onlineBlocked),
+          action: SnackBarAction(
+            label: s.completeSetup,
+            onPressed: _openVerification,
+          ),
+        ),
+      );
+  }
+
   Future<void> _acceptRide(Ride ride) async {
+    if (!_canTakeRides) {
+      _showSetupRequired();
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -175,6 +222,8 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppSettings.instance.strings;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Driver Dashboard'),
@@ -186,12 +235,19 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
           ),
           Switch(
             value: _isOnline,
-            onChanged: (value) {
-              setState(() => _isOnline = value);
-            },
+            onChanged: _canTakeRides
+                ? (value) {
+                    setState(() => _isOnline = value);
+                  }
+                : null,
           ),
           const SizedBox(width: 8),
-          Text(_isOnline ? 'Online' : 'Offline'),
+          Text(
+            _canTakeRides
+                ? (_isOnline ? 'Online' : 'Offline')
+                : s.completeSetup,
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(width: 16),
         ],
       ),
@@ -425,7 +481,204 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
     );
   }
 
+  Widget _buildSetupCard(AppStrings s) {
+    if (_canTakeRides) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5E9),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFA5D6A7)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.verified_rounded,
+              color: Color(0xFF2E7D32),
+              size: 26,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                s.readyToDrive,
+                style: const TextStyle(
+                  color: Color(0xFF2E7D32),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            Switch(
+              value: _isOnline,
+              onChanged: (value) => setState(() => _isOnline = value),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final verificationStatus = _driver?.verificationStatus ?? 'unverified';
+    final vehicleStatus = _myVehicle?.requestStatus;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF2C9A8)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.assignment_turned_in_outlined,
+                color: Color(0xFFE65100),
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  s.completeSetup,
+                  style: const TextStyle(
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF241C15),
+                  ),
+                ),
+              ),
+              Text(
+                s.onlineBlocked,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF9A9086),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _setupRow(
+            icon: Icons.shield_outlined,
+            title: s.verificationStep,
+            status: s.verificationStatusLabel(verificationStatus),
+            done: _verificationApproved,
+            warning: verificationStatus == 'rejected',
+            onTap: _openVerification,
+          ),
+          const Divider(height: 1),
+          _setupRow(
+            icon: Icons.directions_bus_rounded,
+            title: s.vehicleStep,
+            status: _vehicleStatusLabel(s, vehicleStatus),
+            done: vehicleStatus == 'approved',
+            warning: vehicleStatus == 'rejected',
+            onTap: _openVehicle,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _vehicleStatusLabel(AppStrings s, String? status) {
+    switch (status) {
+      case 'approved':
+        return s.vehicleStatusApproved;
+      case 'pending':
+        return s.vehicleStatusPending;
+      case 'rejected':
+        return s.vehicleStatusRejected;
+      default:
+        return s.addVehicle;
+    }
+  }
+
+  Color _vehicleStatusColor(String? status) {
+    switch (status) {
+      case 'approved':
+        return const Color(0xFF2E7D32);
+      case 'pending':
+        return const Color(0xFFEF6C00);
+      case 'rejected':
+        return const Color(0xFFC62828);
+      default:
+        return const Color(0xFF6F6459);
+    }
+  }
+
+  Widget _setupRow({
+    required IconData icon,
+    required String title,
+    required String status,
+    required bool done,
+    required bool warning,
+    required VoidCallback onTap,
+  }) {
+    final color = done
+        ? const Color(0xFF2E7D32)
+        : (warning ? const Color(0xFFC62828) : const Color(0xFFEF6C00));
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(done ? Icons.check_rounded : icon, color: color, size: 21),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF241C15),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    status,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: Color(0xFF9A9086),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHomeTab() {
+    final s = AppSettings.instance.strings;
+
     return RefreshIndicator(
       onRefresh: _loadData,
       child: SingleChildScrollView(
@@ -433,6 +686,8 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildSetupCard(s),
+            const SizedBox(height: 16),
             Card(
               margin: const EdgeInsets.only(bottom: 16),
               color: const Color(0xFFE65100),
@@ -488,40 +743,88 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
             if (_myVehicle != null) ...[
               Card(
                 color: Colors.blue.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PhotoTile(
-                        imageUrl: _myVehicle!.vehicleImage,
-                        size: 64,
-                        borderRadius: 14,
-                        fallbackIcon: Icons.directions_bus,
-                        fallbackColor: const Color(0xFF1565C0),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'My Vehicle',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${_myVehicle!.make} ${_myVehicle!.model}',
-                            ),
-                            Text('Plate: ${_myVehicle!.licensePlate}'),
-                            Text('Color: ${_myVehicle!.color}'),
-                          ],
+                child: InkWell(
+                  onTap: _openVehicle,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PhotoTile(
+                          imageUrl: _myVehicle!.vehicleImage,
+                          size: 64,
+                          borderRadius: 14,
+                          fallbackIcon: Icons.directions_bus,
+                          fallbackColor: const Color(0xFF1565C0),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      s.myVehicle,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _vehicleStatusColor(
+                                        _myVehicle!.requestStatus,
+                                      ).withValues(alpha: 0.14),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      _vehicleStatusLabel(
+                                        s,
+                                        _myVehicle!.requestStatus,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: _vehicleStatusColor(
+                                          _myVehicle!.requestStatus,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${_myVehicle!.make} ${_myVehicle!.model}',
+                              ),
+                              Text('Plate: ${_myVehicle!.licensePlate}'),
+                              Text('Color: ${_myVehicle!.color}'),
+                              if (_myVehicle!.requestStatus == 'rejected' &&
+                                  (_myVehicle!.rejectionReason ?? '')
+                                      .isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  '${s.adminNote}: ${_myVehicle!.rejectionReason}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFFC62828),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, color: Colors.black38),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -637,9 +940,11 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        _isOnline
-                            ? 'No rides available at the moment'
-                            : 'Go online to receive ride requests',
+                        !_canTakeRides
+                            ? s.onlineBlocked
+                            : _isOnline
+                                ? 'No rides available at the moment'
+                                : 'Go online to receive ride requests',
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.grey),
                       ),
@@ -1100,6 +1405,34 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
             ),
           ),
           const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: Icon(
+                _verificationApproved
+                    ? Icons.verified_user_rounded
+                    : Icons.shield_outlined,
+                color: _verificationApproved
+                    ? const Color(0xFF2E7D32)
+                    : const Color(0xFFE65100),
+              ),
+              title: Text(
+                s.driverVerification,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: Text(
+                s.verificationStatusLabel(
+                  _driver?.verificationStatus ?? 'unverified',
+                ),
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  color: Color(0xFF9A9086),
+                ),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _openVerification,
+            ),
+          ),
+          const SizedBox(height: 16),
           if (_myVehicle != null) ...[
             Card(
               child: Padding(
@@ -1118,13 +1451,32 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
                           fallbackColor: const Color(0xFF1565C0),
                         ),
                         const SizedBox(width: 14),
-                        const Expanded(
-                          child: Text(
-                            'Vehicle Information',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Vehicle Information',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _vehicleStatusLabel(
+                                  s,
+                                  _myVehicle!.requestStatus,
+                                ),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: _vehicleStatusColor(
+                                    _myVehicle!.requestStatus,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -1135,8 +1487,56 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
                     _buildProfileRow('License Plate', _myVehicle!.licensePlate),
                     _buildProfileRow('Color', _myVehicle!.color),
                     _buildProfileRow('Year', _myVehicle!.year),
+                    if (_myVehicle!.requestStatus == 'rejected' &&
+                        (_myVehicle!.rejectionReason ?? '').isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '${s.adminNote}: ${_myVehicle!.rejectionReason}',
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: Color(0xFFC62828),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _openVehicle,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: Text(s.editVehicle),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFE65100),
+                          side: const BorderSide(color: Color(0xFFE65100)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ] else ...[
+            Card(
+              child: ListTile(
+                leading: const Icon(
+                  Icons.directions_bus_rounded,
+                  color: Color(0xFFE65100),
+                ),
+                title: Text(
+                  s.addVehicle,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text(
+                  s.vehicleNeeded,
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _openVehicle,
               ),
             ),
             const SizedBox(height: 16),

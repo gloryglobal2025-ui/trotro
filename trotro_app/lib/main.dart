@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'app_scope.dart';
+import 'screens/add_vehicle_screen.dart';
 import 'screens/driver_dashboard.dart';
+import 'screens/driver_verification_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
@@ -46,6 +48,9 @@ class MyApp extends StatelessWidget {
           '/driver-dashboard': (context) => const DriverDashboard(),
           '/wallet': (context) => const WalletScreen(),
           '/profile': (context) => const ProfileScreen(),
+          '/driver-verification': (context) =>
+              const DriverVerificationScreen(),
+          '/driver-vehicle': (context) => const AddVehicleScreen(),
         },
       ),
     );

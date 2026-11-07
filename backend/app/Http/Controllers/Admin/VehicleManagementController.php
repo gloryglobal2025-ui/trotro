@@ -170,6 +170,8 @@ class VehicleManagementController extends Controller
     {
         $vehicle->update([
             'request_status' => 'approved',
+            'is_active' => true,
+            'rejection_reason' => null,
             'request_approved_at' => now(),
             'request_approved_by' => auth()->id(),
         ]);
@@ -185,6 +187,7 @@ class VehicleManagementController extends Controller
 
         $vehicle->update([
             'request_status' => 'rejected',
+            'is_active' => false,
             'rejection_reason' => $validated['rejection_reason'],
             'request_approved_at' => now(),
             'request_approved_by' => auth()->id(),

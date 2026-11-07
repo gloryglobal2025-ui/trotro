@@ -104,6 +104,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
             Route::put('/{user}', [UserManagementController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
+            Route::get('/verification-requests', [UserManagementController::class, 'verificationRequests'])->name('verification-requests');
+            Route::post('/{user}/verification/approve', [UserManagementController::class, 'approveVerification'])->name('verification-requests.approve');
+            Route::post('/{user}/verification/reject', [UserManagementController::class, 'rejectVerification'])->name('verification-requests.reject');
             Route::get('/driver-levels', [UserManagementController::class, 'driverLevels'])->name('driver-levels');
             Route::post('/driver-levels', [UserManagementController::class, 'storeDriverLevel'])->name('storeDriverLevel');
             Route::get('/customer-levels', [UserManagementController::class, 'customerLevels'])->name('customer-levels');

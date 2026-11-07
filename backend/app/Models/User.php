@@ -24,6 +24,16 @@ class User extends Authenticatable
         'rating',
         'total_rides',
         'user_level_id',
+        'license_number',
+        'license_image',
+        'license_expiry',
+        'ghana_card_number',
+        'ghana_card_image',
+        'verification_status',
+        'verification_notes',
+        'verification_submitted_at',
+        'verified_at',
+        'verified_by',
     ];
 
     protected $hidden = [
@@ -33,6 +43,8 @@ class User extends Authenticatable
 
     protected $appends = [
         'profile_image_url',
+        'license_image_url',
+        'ghana_card_image_url',
     ];
 
     /**
@@ -47,6 +59,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'rating' => 'float',
             'is_assisted' => 'boolean',
+            'license_expiry' => 'date',
+            'verification_submitted_at' => 'datetime',
+            'verified_at' => 'datetime',
         ];
     }
 
@@ -120,8 +135,28 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isVerifiedDriver(): bool
+    {
+        return $this->isDriver() && $this->verification_status === 'approved';
+    }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
     public function getProfileImageUrlAttribute(): ?string
     {
         return Image::url($this->profile_image);
+    }
+
+    public function getLicenseImageUrlAttribute(): ?string
+    {
+        return Image::url($this->license_image);
+    }
+
+    public function getGhanaCardImageUrlAttribute(): ?string
+    {
+        return Image::url($this->ghana_card_image);
     }
 }

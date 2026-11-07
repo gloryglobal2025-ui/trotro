@@ -23,8 +23,11 @@ class UserManagementController extends Controller
     {
         $users = User::with(['userLevel', 'wallet'])->latest()->paginate(20);
         $levels = UserLevel::orderBy('order')->get();
+        $pendingVerifications = User::where('role', 'driver')
+            ->where('verification_status', 'pending')
+            ->count();
 
-        return view('admin.users.index', compact('users', 'levels'));
+        return view('admin.users.index', compact('users', 'levels', 'pendingVerifications'));
     }
 
     public function create()
@@ -104,6 +107,59 @@ class UserManagementController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User deleted successfully.');
+    }
+
+    // Driver Verification
+    public function verificationRequests()
+    {
+        $drivers = User::where('role', 'driver')
+            ->where('verification_status', 'pending')
+            ->with(['vehicle', 'verifiedBy'])
+            ->orderByDesc('verification_submitted_at')
+            ->paginate(20);
+
+        $counts = [
+            'pending' => User::where('role', 'driver')->where('verification_status', 'pending')->count(),
+            'approved' => User::where('role', 'driver')->where('verification_status', 'approved')->count(),
+            'rejected' => User::where('role', 'driver')->where('verification_status', 'rejected')->count(),
+            'unverified' => User::where('role', 'driver')->where('verification_status', 'unverified')->count(),
+        ];
+
+        return view('admin.users.verification-requests', compact('drivers', 'counts'));
+    }
+
+    public function approveVerification(User $user)
+    {
+        abort_unless($user->isDriver(), 404);
+
+        $user->update([
+            'verification_status' => 'approved',
+            'verification_notes' => null,
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('admin.users.verification-requests')
+            ->with('success', "{$user->name} is now a verified driver.");
+    }
+
+    public function rejectVerification(Request $request, User $user)
+    {
+        abort_unless($user->isDriver(), 404);
+
+        $validated = $request->validate(['verification_notes' => 'nullable|string']);
+
+        $user->update([
+            'verification_status' => 'rejected',
+            'verification_notes' => $validated['verification_notes'],
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('admin.users.verification-requests')
+            ->with('success', "{$user->name}'s verification was rejected.");
     }
 
     // Driver Levels

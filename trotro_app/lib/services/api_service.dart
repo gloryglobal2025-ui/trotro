@@ -437,6 +437,67 @@ class ApiService {
     }
   }
 
+  static Future<http.Response> _sendMultipart(
+    String method,
+    String path,
+    Map<String, String> fields, [
+    Map<String, _UploadFile> files = const {},
+  ]) async {
+    final request = http.MultipartRequest(method, Uri.parse('$baseUrl$path'));
+    request.headers['Accept'] = 'application/json';
+    if (_authToken != null) {
+      request.headers['Authorization'] = 'Bearer $_authToken';
+    }
+    request.fields.addAll(fields);
+    files.forEach((field, file) {
+      request.files.add(
+        http.MultipartFile.fromBytes(field, file.bytes, filename: file.name),
+      );
+    });
+
+    final streamed = await request.send();
+    return http.Response.fromStream(streamed);
+  }
+
+  static Future<User> submitDriverVerification({
+    required String licenseNumber,
+    required String licenseExpiry,
+    required String ghanaCardNumber,
+    List<int>? licenseImage,
+    String licenseFilename = 'license.jpg',
+    List<int>? ghanaCardImage,
+    String ghanaCardFilename = 'ghana-card.jpg',
+  }) async {
+    final response = await _sendMultipart(
+      'POST',
+      '/auth/driver-verification',
+      {
+        'license_number': licenseNumber,
+        'license_expiry': licenseExpiry,
+        'ghana_card_number': ghanaCardNumber,
+      },
+      {
+        if (licenseImage != null)
+          'license_image': _UploadFile(licenseImage, licenseFilename),
+        if (ghanaCardImage != null)
+          'ghana_card_image': _UploadFile(ghanaCardImage, ghanaCardFilename),
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final userJson = data is Map<String, dynamic> ? data['user'] : null;
+      if (userJson is Map<String, dynamic>) {
+        currentUser = User.fromJson(userJson);
+        return currentUser!;
+      }
+    }
+
+    throw Exception(
+      _errorMessage(response, 'Could not submit your verification'),
+    );
+  }
+
   static Future<Vehicle> createVehicle({
     required String make,
     required String model,
@@ -445,26 +506,87 @@ class ApiService {
     required String color,
     required int capacity,
     required String vehicleType,
+    required List<int> vehicleImage,
+    required String vehicleImageName,
+    required List<int> registrationImage,
+    required String registrationImageName,
+    required List<int> roadworthyImage,
+    required String roadworthyImageName,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/vehicles'),
-      headers: _headers,
-      body: jsonEncode({
+    final response = await _sendMultipart(
+      'POST',
+      '/vehicles',
+      {
         'make': make,
         'model': model,
-        'year': year,
+        'year': year.toString(),
         'license_plate': licensePlate,
         'color': color,
-        'capacity': capacity,
+        'capacity': capacity.toString(),
         'vehicle_type': vehicleType,
-      }),
+      },
+      {
+        'vehicle_image': _UploadFile(vehicleImage, vehicleImageName),
+        'registration_image':
+            _UploadFile(registrationImage, registrationImageName),
+        'roadworthy_image':
+            _UploadFile(roadworthyImage, roadworthyImageName),
+      },
     );
 
     if (response.statusCode == 201) {
       return Vehicle.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to create vehicle');
     }
+
+    throw Exception(_errorMessage(response, 'Could not submit your vehicle'));
+  }
+
+  static Future<Vehicle> updateVehicle({
+    required int id,
+    required String make,
+    required String model,
+    required int year,
+    required String licensePlate,
+    required String color,
+    required int capacity,
+    required String vehicleType,
+    List<int>? vehicleImage,
+    String vehicleImageName = 'vehicle.jpg',
+    List<int>? registrationImage,
+    String registrationImageName = 'registration.jpg',
+    List<int>? roadworthyImage,
+    String roadworthyImageName = 'roadworthy.jpg',
+  }) async {
+    final response = await _sendMultipart(
+      'POST',
+      '/vehicles/$id',
+      {
+        '_method': 'PUT',
+        'make': make,
+        'model': model,
+        'year': year.toString(),
+        'license_plate': licensePlate,
+        'color': color,
+        'capacity': capacity.toString(),
+        'vehicle_type': vehicleType,
+      },
+      {
+        if (vehicleImage != null)
+          'vehicle_image': _UploadFile(vehicleImage, vehicleImageName),
+        if (registrationImage != null)
+          'registration_image':
+              _UploadFile(registrationImage, registrationImageName),
+        if (roadworthyImage != null)
+          'roadworthy_image':
+              _UploadFile(roadworthyImage, roadworthyImageName),
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return Vehicle.fromJson(json.decode(response.body));
+    }
+
+    throw Exception(_errorMessage(response, 'Could not update your vehicle'));
   }
 
   // Wallet
@@ -680,4 +802,11 @@ class ApiService {
       throw Exception('Failed to get payment status');
     }
   }
+}
+
+class _UploadFile {
+  const _UploadFile(this.bytes, this.name);
+
+  final List<int> bytes;
+  final String name;
 }

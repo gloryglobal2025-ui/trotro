@@ -159,7 +159,16 @@ class RideController extends Controller
                     return response()->json(['message' => 'This ride is no longer available.'], 422);
                 }
 
-                $vehicle = $user->vehicle()->where('is_active', true)->first();
+                if (! $user->isVerifiedDriver()) {
+                    return response()->json([
+                        'message' => 'Your driver account is not verified yet. Submit your licence and Ghana Card for approval.',
+                    ], 403);
+                }
+
+                $vehicle = $user->vehicle()
+                    ->where('is_active', true)
+                    ->where('request_status', 'approved')
+                    ->first();
 
                 if (! $vehicle) {
                     return response()->json(['message' => 'An approved, active vehicle is required to accept rides.'], 422);
@@ -302,6 +311,7 @@ class RideController extends Controller
         $this->authorizeParticipant($request->user(), $ride);
 
         $drivers = User::where('role', 'driver')
+            ->where('verification_status', 'approved')
             ->whereHas('vehicle', function ($query) {
                 $query->where('is_active', true);
             })

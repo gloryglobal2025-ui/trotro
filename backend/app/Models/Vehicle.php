@@ -19,6 +19,8 @@ class Vehicle extends Model
         'vehicle_type',
         'is_active',
         'vehicle_image',
+        'registration_image',
+        'roadworthy_image',
         'request_status',
         'rejection_reason',
         'request_approved_at',
@@ -32,11 +34,23 @@ class Vehicle extends Model
 
     protected $appends = [
         'vehicle_image_url',
+        'registration_image_url',
+        'roadworthy_image_url',
     ];
 
     public function getVehicleImageUrlAttribute(): ?string
     {
         return Image::url($this->vehicle_image);
+    }
+
+    public function getRegistrationImageUrlAttribute(): ?string
+    {
+        return Image::url($this->registration_image);
+    }
+
+    public function getRoadworthyImageUrlAttribute(): ?string
+    {
+        return Image::url($this->roadworthy_image);
     }
 
     public function driver()

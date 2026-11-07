@@ -37,7 +37,9 @@ class VehicleController extends Controller
             'color' => 'required|string|max:50',
             'capacity' => 'required|integer|min:1|max:20',
             'vehicle_type' => 'required|in:sedan,suv,minivan,bus',
-            'vehicle_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'vehicle_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'registration_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'roadworthy_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         if ($validator->fails()) {
@@ -53,10 +55,11 @@ class VehicleController extends Controller
             'color' => $request->color,
             'capacity' => $request->capacity,
             'vehicle_type' => $request->vehicle_type,
-            'vehicle_image' => $request->hasFile('vehicle_image')
-                ? Image::store($request->file('vehicle_image'), 'vehicles')
-                : null,
-            'is_active' => false, // Requires admin approval
+            'vehicle_image' => Image::store($request->file('vehicle_image'), 'vehicles'),
+            'registration_image' => Image::store($request->file('registration_image'), 'vehicles'),
+            'roadworthy_image' => Image::store($request->file('roadworthy_image'), 'vehicles'),
+            'is_active' => false,
+            'request_status' => 'pending',
         ]);
 
         return response()->json($vehicle->load('driver'), 201);
@@ -92,6 +95,9 @@ class VehicleController extends Controller
             'capacity' => 'sometimes|required|integer|min:1|max:20',
             'vehicle_type' => 'sometimes|required|in:sedan,suv,minivan,bus',
             'is_active' => 'sometimes|boolean',
+            'vehicle_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'registration_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'roadworthy_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
         ]);
 
         if ($validator->fails()) {
@@ -103,8 +109,23 @@ class VehicleController extends Controller
             'capacity', 'vehicle_type',
         ]);
 
+        foreach (['vehicle_image', 'registration_image', 'roadworthy_image'] as $field) {
+            if ($request->hasFile($field)) {
+                Image::delete($vehicle->{$field});
+                $data[$field] = Image::store($request->file($field), 'vehicles');
+            }
+        }
+
         if ($user->isAdmin()) {
             $data['is_active'] = $request->boolean('is_active', $vehicle->is_active);
+        } elseif ($vehicle->request_status !== 'pending') {
+            $data = array_merge($data, [
+                'request_status' => 'pending',
+                'rejection_reason' => null,
+                'request_approved_at' => null,
+                'request_approved_by' => null,
+                'is_active' => false,
+            ]);
         }
 
         $vehicle->update($data);
@@ -121,6 +142,8 @@ class VehicleController extends Controller
         }
 
         Image::delete($vehicle->vehicle_image);
+        Image::delete($vehicle->registration_image);
+        Image::delete($vehicle->roadworthy_image);
         $vehicle->delete();
 
         return response()->json(null, 204);
@@ -162,6 +185,12 @@ class VehicleController extends Controller
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        if (! $user->isAdmin() && $request->boolean('is_active') && $vehicle->request_status !== 'approved') {
+            return response()->json([
+                'message' => 'Your vehicle must be approved before you can go online.',
+            ], 422);
         }
 
         $vehicle->update(['is_active' => $request->is_active]);
