@@ -14,8 +14,23 @@ use App\Http\Controllers\Admin\ZoneController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
+// Serve Flutter web app at /web
+Route::get('/web', function () {
+    return response()->file(public_path('web/index.html'));
+});
+
+// Serve static assets for Flutter web app from /web/*
+Route::get('/web/{path}', function ($path) {
+    $file = public_path('web/' . $path);
+    if (file_exists($file) && !str_starts_with($path, '.')) {
+        return response()->file($file);
+    }
+    abort(404);
+})->where('path', '.*');
+
+// Root redirects to admin (change to /web if you want web app at root)
 Route::get('/', function () {
-    return redirect()->route('admin.dashboard');
+    return redirect('/web');
 });
 
 Route::get('/media/{path}', function (string $path) {
