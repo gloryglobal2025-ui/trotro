@@ -2,6 +2,13 @@
 # request into public/ so Laravel's front controller handles it.
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Send direct client requests for /public/... to the clean path (/...).
+    # THE_REQUEST is the original request line, so internal rewrites below
+    # (which also use a public/ prefix) do not trigger this redirect.
+    RewriteCond %{THE_REQUEST} \s/+public/ [NC]
+    RewriteRule ^public/(.*)$ /$1 [R=301,L]
+
     RewriteRule ^(?!public/)(.*)$ public/$1 [L]
 </IfModule>
 
