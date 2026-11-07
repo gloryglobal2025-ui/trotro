@@ -1,9 +1,8 @@
-# Defense in depth: if Apache is pointed at the project root instead of public/,
-# block direct access to everything except the public directory.
+# When Apache's document root is the project root (not public/), route every
+# request into public/ so Laravel's front controller handles it.
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^public/ - [L]
-    RewriteRule ^ - [F,L]
+    RewriteRule ^(?!public/)(.*)$ public/$1 [L]
 </IfModule>
 
 <FilesMatch "^\.">
