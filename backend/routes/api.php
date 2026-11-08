@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdvertisementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BusStopController;
 use App\Http\Controllers\Api\FareController;
@@ -80,6 +81,9 @@ Route::apiResource('zones', ZoneController::class)->only(['index', 'show']);
 Route::get('/settings', [SettingController::class, 'index']);
 Route::get('/settings/{key}', [SettingController::class, 'show']);
 Route::post('/settings/fare-calculation', [SettingController::class, 'fareCalculation']);
+
+// Promotional banners shown in the app and on the web build.
+Route::get('/advertisements', [AdvertisementController::class, 'index']);
 
 // Catalogue writes are restricted to administrators.
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {

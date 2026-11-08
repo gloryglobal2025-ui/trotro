@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdvertisementController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BusStopController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -10,7 +11,9 @@ use App\Http\Controllers\Admin\RouteController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\VehicleManagementController;
+use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\Admin\ZoneController;
+use App\Http\Controllers\WebsiteController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,10 +31,8 @@ Route::get('/web/{path}', function ($path) {
     abort(404);
 })->where('path', '.*');
 
-// Root redirects to admin (change to /web if you want web app at root)
-Route::get('/', function () {
-    return redirect('/web');
-});
+// Public marketing website. The Flutter app stays at /web.
+Route::get('/', [WebsiteController::class, 'index'])->name('website.home');
 
 Route::get('/media/{path}', function (string $path) {
     abort_if(str_contains($path, '..'), 404);
@@ -80,6 +81,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{pass}/pin/unlock', [PassManagementController::class, 'unlockPin'])->name('pin.unlock');
             Route::post('/{pass}/approval', [PassManagementController::class, 'updateApproval'])->name('approval');
         });
+        Route::get('website', [AdminWebsiteController::class, 'edit'])->name('website.edit');
+        Route::put('website', [AdminWebsiteController::class, 'update'])->name('website.update');
         Route::post('settings/bulk-update', [SettingController::class, 'bulkUpdate'])->name('settings.bulkUpdate');
         Route::resource('settings', SettingController::class);
         Route::prefix('vehicles')->name('vehicles.')->group(function () {
@@ -96,6 +99,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/request/{vehicle}/approve', [VehicleManagementController::class, 'approveRequest'])->name('new-requests.approve');
             Route::post('/request/{vehicle}/reject', [VehicleManagementController::class, 'rejectRequest'])->name('new-requests.reject');
             Route::get('/update/list', [VehicleManagementController::class, 'updateRequests'])->name('update-requests');
+        });
+        Route::prefix('adverts')->name('adverts.')->group(function () {
+            Route::get('/', [AdvertisementController::class, 'index'])->name('index');
+            Route::get('/create', [AdvertisementController::class, 'create'])->name('create');
+            Route::post('/', [AdvertisementController::class, 'store'])->name('store');
+            Route::get('/{advert}/edit', [AdvertisementController::class, 'edit'])->name('edit');
+            Route::put('/{advert}', [AdvertisementController::class, 'update'])->name('update');
+            Route::post('/{advert}/toggle', [AdvertisementController::class, 'toggle'])->name('toggle');
+            Route::delete('/{advert}', [AdvertisementController::class, 'destroy'])->name('destroy');
         });
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [UserManagementController::class, 'index'])->name('index');

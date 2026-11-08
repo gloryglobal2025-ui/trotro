@@ -9,6 +9,7 @@ import '../models/route.dart' as trotro;
 import '../services/api_service.dart';
 import '../services/app_settings.dart';
 import '../services/tts_service.dart';
+import '../widgets/advert_banner.dart';
 import '../widgets/photo_tile.dart';
 
 class TrotroHomePage extends StatefulWidget {
@@ -518,6 +519,7 @@ class _TrotroHomePageState extends State<TrotroHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const AdvertBanner(placement: 'home'),
                   _buildOriginCard(s),
                   const SizedBox(height: 12),
                   _buildHelpCard(s),

@@ -6,6 +6,7 @@ import '../l10n/app_strings.dart';
 import '../services/api_service.dart';
 import '../services/app_settings.dart';
 import '../services/tts_service.dart';
+import '../widgets/advert_banner.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -224,6 +225,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Transform.translate(
                   offset: const Offset(0, -26),
                   child: _buildCard(),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(18, 4, 18, 8),
+                child: AdvertBanner(
+                  placement: 'home',
+                  height: 136,
+                  margin: EdgeInsets.zero,
                 ),
               ),
               Padding(

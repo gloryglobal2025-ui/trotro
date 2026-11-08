@@ -30,6 +30,9 @@ class AppStrings {
   String get driver => _t('Driver', 'Driver');
   String get languageLabel => _t('Language', 'Kasa');
   String get languageChanged => _t('Language changed', 'Kasa asesa');
+  String get sponsored => _t('Sponsored', 'Advert');
+  String get advertOpenFailed =>
+      _t('Could not open the link', 'Antumi ammue link no');
 
   // Login
   String get welcomeBack => _t('Welcome back', 'Akwaaba bio');

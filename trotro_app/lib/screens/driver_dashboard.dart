@@ -11,6 +11,7 @@ import 'wallet_screen.dart';
 import 'qr_pass_screen.dart';
 import 'add_vehicle_screen.dart';
 import '../services/app_settings.dart';
+import '../widgets/advert_banner.dart';
 import '../widgets/photo_tile.dart';
 import '../services/tts_service.dart';
 
@@ -688,6 +689,7 @@ class _DriverDashboardState extends State<DriverDashboard> with RealtimeMixin {
           children: [
             _buildSetupCard(s),
             const SizedBox(height: 16),
+            const AdvertBanner(placement: 'driver'),
             Card(
               margin: const EdgeInsets.only(bottom: 16),
               color: const Color(0xFFE65100),

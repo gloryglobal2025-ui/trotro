@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/advert.dart';
 import '../models/bus_stop.dart';
 import '../models/route.dart' as trotro;
 import '../models/route_from_stop.dart';
@@ -214,6 +215,24 @@ class ApiService {
     } else {
       throw Exception('Failed to load bus stops');
     }
+  }
+
+  // Adverts
+  static Future<List<Advert>> getAdverts({String placement = 'home'}) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/advertisements?placement=$placement'),
+      headers: _headers,
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as List<dynamic>;
+      return data
+          .map((json) => Advert.fromJson(json as Map<String, dynamic>))
+          .where((advert) => advert.imageUrl != null)
+          .toList();
+    }
+
+    throw Exception('Failed to load adverts');
   }
 
   // Routes
