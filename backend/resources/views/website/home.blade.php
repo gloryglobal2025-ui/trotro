@@ -3,28 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ \App\Helpers\SettingHelper::getAppName() }} — {{ $content['hero_title'] }}</title>
-    <meta name="description" content="{{ \Illuminate\Support\Str::limit($content['hero_subtitle'], 155) }}">
-    <meta property="og:title" content="{{ \App\Helpers\SettingHelper::getAppName() }} — {{ $content['hero_title'] }}">
-    <meta property="og:description" content="{{ \Illuminate\Support\Str::limit($content['hero_subtitle'], 155) }}">
-    @if($content['hero_image_url'])
-        <meta property="og:image" content="{{ $content['hero_image_url'] }}">
-    @endif
+    @php
+        $appName = \App\Helpers\SettingHelper::getAppName();
+        $pageTitle = $content['meta_title'] ?: ($appName . ' — ' . $content['hero_title']);
+        $pageDescription = $content['meta_description'] ?: \Illuminate\Support\Str::limit($content['hero_subtitle'], 155);
+        $canonical = url('/');
+        $shareImage = $content['share_image_url'] ?: ($content['hero_image_url'] ?: asset('favicon.ico'));
+        $cssFile = public_path('css/website.css');
+        $cssVersion = file_exists($cssFile) ? filemtime($cssFile) : '1';
+        $appSchemaId = url('/web') . '#app';
+        $orgSchemaId = $canonical . '#organization';
+        $structuredData = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'Organization',
+                    '@id' => $orgSchemaId,
+                    'name' => $appName,
+                    'url' => $canonical,
+                    'logo' => asset('favicon.ico'),
+                    'description' => $pageDescription,
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $canonical . '#website',
+                    'url' => $canonical,
+                    'name' => $appName,
+                    'inLanguage' => 'en-GH',
+                    'publisher' => ['@id' => $orgSchemaId],
+                ],
+                [
+                    '@type' => 'MobileApplication',
+                    '@id' => $appSchemaId,
+                    'name' => $appName,
+                    'url' => url('/web'),
+                    'applicationCategory' => 'TravelApplication',
+                    'operatingSystem' => 'Android, Web',
+                    'inLanguage' => 'en-GH',
+                    'description' => $pageDescription,
+                    'publisher' => ['@id' => $orgSchemaId],
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => '0',
+                        'priceCurrency' => 'GHS',
+                    ],
+                ],
+            ],
+        ];
+    @endphp
+
+    <title>{{ $pageTitle }}</title>
+    <meta name="description" content="{{ $pageDescription }}">
+    <link rel="canonical" href="{{ $canonical }}">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="theme-color" content="#EA580C">
+    <meta name="geo.region" content="GH-AA">
+    <meta name="geo.placename" content="Accra, Ghana">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $appName }}">
+    <meta property="og:locale" content="en_GH">
+    <meta property="og:url" content="{{ $canonical }}">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $pageDescription }}">
+    <meta property="og:image" content="{{ $shareImage }}">
+    <meta property="og:image:alt" content="{{ $appName }} — {{ $content['hero_title'] }}">
+    <meta name="twitter:card" content="{{ $content['share_image_url'] || $content['hero_image_url'] ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $pageDescription }}">
+    <meta name="twitter:image" content="{{ $shareImage }}">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                    },
-                },
-            },
-        };
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ $cssVersion }}">
+    <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 </head>
 <body class="bg-[#FBF8F4] font-sans text-stone-900 antialiased">
 
@@ -103,16 +156,16 @@
 
                 <dl class="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-stone-200 pt-6 text-sm">
                     <div>
-                        <dt class="font-bold text-stone-900">Clear fares</dt>
-                        <dd class="mt-0.5 text-stone-500">Price before you board</dd>
+                        <dt class="font-bold text-stone-900">{{ $content['hero_point_1_title'] }}</dt>
+                        <dd class="mt-0.5 text-stone-500">{{ $content['hero_point_1_body'] }}</dd>
                     </div>
                     <div>
-                        <dt class="font-bold text-stone-900">Verified drivers</dt>
-                        <dd class="mt-0.5 text-stone-500">Checked before approval</dd>
+                        <dt class="font-bold text-stone-900">{{ $content['hero_point_2_title'] }}</dt>
+                        <dd class="mt-0.5 text-stone-500">{{ $content['hero_point_2_body'] }}</dd>
                     </div>
                     <div>
-                        <dt class="font-bold text-stone-900">Cash or wallet</dt>
-                        <dd class="mt-0.5 text-stone-500">Pay the way you prefer</dd>
+                        <dt class="font-bold text-stone-900">{{ $content['hero_point_3_title'] }}</dt>
+                        <dd class="mt-0.5 text-stone-500">{{ $content['hero_point_3_body'] }}</dd>
                     </div>
                 </dl>
             </div>
@@ -120,7 +173,7 @@
             <div class="relative">
                 @if($content['hero_image_url'])
                     <div class="overflow-hidden rounded-[2rem] border border-white/60 shadow-2xl shadow-stone-900/20">
-                        <img src="{{ $content['hero_image_url'] }}" alt="{{ \App\Helpers\SettingHelper::getAppName() }} on the road" class="aspect-[4/5] w-full object-cover">
+                        <img src="{{ $content['hero_image_url'] }}" alt="{{ \App\Helpers\SettingHelper::getAppName() }} on the road" class="aspect-[4/5] w-full object-cover" fetchpriority="high" decoding="async">
                     </div>
                 @else
                     <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-stone-900 via-stone-900 to-orange-950 p-8 shadow-2xl shadow-stone-900/30 sm:p-10">
@@ -188,7 +241,7 @@
                         <{{ $tag }} @if($advert->link_url) href="{{ $advert->link_url }}" target="_blank" rel="noopener sponsored" @endif
                            class="group relative block overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition hover:shadow-lg">
                             @if($advert->image_url)
-                                <img src="{{ $advert->image_url }}" alt="{{ $advert->title }}" class="aspect-[12/5] w-full object-cover transition duration-500 group-hover:scale-[1.02]">
+                                <img src="{{ $advert->image_url }}" alt="{{ $advert->title }}" loading="lazy" decoding="async" class="aspect-[12/5] w-full object-cover transition duration-500 group-hover:scale-[1.02]">
                             @else
                                 <div class="flex aspect-[12/5] w-full items-center justify-center bg-gradient-to-br from-orange-500 to-amber-600 px-4 text-center">
                                     <p class="text-sm font-bold text-white">{{ $advert->title }}</p>
@@ -207,7 +260,7 @@
     {{-- How it works --}}
     <section id="how-it-works" class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <div class="max-w-2xl">
-            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">How it works</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">{{ $content['about_eyebrow'] }}</p>
             <h2 class="mt-3 text-3xl font-black tracking-tight text-stone-900 sm:text-4xl">{{ $content['about_title'] }}</h2>
             <p class="mt-4 text-base leading-relaxed text-stone-600">{{ $content['about_body'] }}</p>
         </div>
@@ -220,8 +273,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                     </svg>
                 </span>
-                <h3 class="mt-4 text-base font-bold text-stone-900">Pick where you are</h3>
-                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">Choose your stop from photos and names, not long lists of text.</p>
+                <h3 class="mt-4 text-base font-bold text-stone-900">{{ $content['step_1_title'] }}</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">{{ $content['step_1_body'] }}</p>
             </div>
 
             <div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -230,8 +283,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10" />
                     </svg>
                 </span>
-                <h3 class="mt-4 text-base font-bold text-stone-900">Pick where you are going</h3>
-                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">See the fare for each destination before you leave the house.</p>
+                <h3 class="mt-4 text-base font-bold text-stone-900">{{ $content['step_2_title'] }}</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">{{ $content['step_2_body'] }}</p>
             </div>
 
             <div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -240,8 +293,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                     </svg>
                 </span>
-                <h3 class="mt-4 text-base font-bold text-stone-900">Board a verified trotro</h3>
-                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">Drivers are reviewed before they can accept trips on Trotro.</p>
+                <h3 class="mt-4 text-base font-bold text-stone-900">{{ $content['step_3_title'] }}</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">{{ $content['step_3_body'] }}</p>
             </div>
 
             <div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
@@ -250,8 +303,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                     </svg>
                 </span>
-                <h3 class="mt-4 text-base font-bold text-stone-900">Pay cash or wallet</h3>
-                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">Hand over cash or tap your QR pass. The amount is never a surprise.</p>
+                <h3 class="mt-4 text-base font-bold text-stone-900">{{ $content['step_4_title'] }}</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-stone-500">{{ $content['step_4_body'] }}</p>
             </div>
         </div>
     </section>
@@ -262,11 +315,11 @@
             <div class="mx-auto max-w-6xl px-4 sm:px-6">
                 <div class="flex flex-wrap items-end justify-between gap-4">
                     <div>
-                        <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">Popular routes</p>
-                        <h2 class="mt-3 text-3xl font-black tracking-tight text-stone-900">Where Trotro can take you</h2>
+                        <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">{{ $content['routes_eyebrow'] }}</p>
+                        <h2 class="mt-3 text-3xl font-black tracking-tight text-stone-900">{{ $content['routes_title'] }}</h2>
                     </div>
                     <a href="{{ $appUrl }}" class="text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4 transition hover:text-orange-600">
-                        See all routes in the app
+                        {{ $content['routes_link_label'] }}
                     </a>
                 </div>
 
@@ -308,14 +361,14 @@
     {{-- Stops gallery --}}
     @if($stops->isNotEmpty())
         <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">Stops</p>
-            <h2 class="mt-3 text-3xl font-black tracking-tight text-stone-900">Know the stop when you see it</h2>
-            <p class="mt-3 max-w-2xl text-base leading-relaxed text-stone-600">Photos of real stops help every rider — including people who cannot read the sign — find the right place to board.</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">{{ $content['stops_eyebrow'] }}</p>
+            <h2 class="mt-3 text-3xl font-black tracking-tight text-stone-900">{{ $content['stops_title'] }}</h2>
+            <p class="mt-3 max-w-2xl text-base leading-relaxed text-stone-600">{{ $content['stops_body'] }}</p>
 
             <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
                 @foreach($stops as $stop)
                     <figure class="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
-                        <img src="{{ $stop->image_url }}" alt="{{ $stop->name }}" class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]">
+                        <img src="{{ $stop->image_url }}" alt="{{ $stop->name }}" loading="lazy" decoding="async" class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]">
                         <figcaption class="px-4 py-3">
                             <p class="text-sm font-bold text-stone-900">{{ $stop->name }}</p>
                             @if($stop->area)
@@ -333,17 +386,17 @@
         <div class="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-orange-600/30 blur-3xl"></div>
         <div class="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24">
             <div>
-                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-400">For drivers</p>
-                <h2 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Fill your trotro. Skip the shouting.</h2>
+                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-400">{{ $content['drivers_eyebrow'] }}</p>
+                <h2 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">{{ $content['drivers_title'] }}</h2>
                 <p class="mt-4 max-w-xl text-base leading-relaxed text-stone-300">
-                    Riders see your route, your stop and the fare up front. Collect cash as usual, or let riders tap a QR pass — no extra machine needed.
+                    {{ $content['drivers_body'] }}
                 </p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ $driverUrl }}" class="rounded-2xl bg-orange-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-950/40 transition hover:bg-orange-700">
                         {{ $content['hero_secondary_cta'] }}
                     </a>
                     <a href="#contact" class="rounded-2xl border border-white/20 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
-                        Talk to our team
+                        {{ $content['drivers_secondary_cta'] }}
                     </a>
                 </div>
             </div>
@@ -354,8 +407,8 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
                     </span>
                     <div>
-                        <p class="text-sm font-bold text-white">Verified driver badge</p>
-                        <p class="mt-1 text-sm text-stone-400">Upload your licence and vehicle once, then get approved by our team.</p>
+                        <p class="text-sm font-bold text-white">{{ $content['driver_point_1_title'] }}</p>
+                        <p class="mt-1 text-sm text-stone-400">{{ $content['driver_point_1_body'] }}</p>
                     </div>
                 </li>
                 <li class="flex items-start gap-3 rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
@@ -363,8 +416,8 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
                     </span>
                     <div>
-                        <p class="text-sm font-bold text-white">Fares set by admin</p>
-                        <p class="mt-1 text-sm text-stone-400">No arguing at the roadside — the app shows the agreed price for each leg.</p>
+                        <p class="text-sm font-bold text-white">{{ $content['driver_point_2_title'] }}</p>
+                        <p class="mt-1 text-sm text-stone-400">{{ $content['driver_point_2_body'] }}</p>
                     </div>
                 </li>
                 <li class="flex items-start gap-3 rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
@@ -372,8 +425,8 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
                     </span>
                     <div>
-                        <p class="text-sm font-bold text-white">Scan and charge</p>
-                        <p class="mt-1 text-sm text-stone-400">Tap &amp; Ride passes let repeat riders board in seconds.</p>
+                        <p class="text-sm font-bold text-white">{{ $content['driver_point_3_title'] }}</p>
+                        <p class="mt-1 text-sm text-stone-400">{{ $content['driver_point_3_body'] }}</p>
                     </div>
                 </li>
             </ul>
@@ -384,10 +437,10 @@
     <section id="contact" class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
             <div>
-                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">Contact</p>
-                <h2 class="mt-3 text-3xl font-black tracking-tight text-stone-900">Questions, lost items, or a bad trip?</h2>
+                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-600">{{ $content['contact_eyebrow'] }}</p>
+                <h2 class="mt-3 text-3xl font-black tracking-tight text-stone-900">{{ $content['contact_title'] }}</h2>
                 <p class="mt-4 max-w-xl text-base leading-relaxed text-stone-600">
-                    Call or message us and a real person from the Trotro team will help. We also want to hear from drivers and transport unions who want to join.
+                    {{ $content['contact_body'] }}
                 </p>
 
                 <div class="mt-8 space-y-3">
@@ -437,9 +490,9 @@
             </div>
 
             <div class="rounded-[2rem] bg-gradient-to-br from-orange-500 to-amber-600 p-8 text-white shadow-2xl shadow-orange-900/20 sm:p-10">
-                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-100">Ready to ride?</p>
-                <p class="mt-3 text-2xl font-black leading-tight sm:text-3xl">Open Trotro and see your fare in seconds.</p>
-                <p class="mt-3 text-sm leading-relaxed text-orange-50">Works in your browser today — no download required. Add it to your home screen and it behaves like a normal app.</p>
+                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-orange-100">{{ $content['cta_eyebrow'] }}</p>
+                <p class="mt-3 text-2xl font-black leading-tight sm:text-3xl">{{ $content['cta_title'] }}</p>
+                <p class="mt-3 text-sm leading-relaxed text-orange-50">{{ $content['cta_body'] }}</p>
                 <div class="mt-7 flex flex-col gap-3 sm:flex-row">
                     <a href="{{ $appUrl }}" class="rounded-2xl bg-white px-6 py-3.5 text-center text-sm font-bold text-orange-700 shadow-sm transition hover:bg-orange-50">
                         {{ $content['hero_cta'] }}

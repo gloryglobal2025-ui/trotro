@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Advertisement;
 use App\Support\Image;
+use App\Support\Website;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -37,6 +38,7 @@ class AdvertisementController extends Controller
         $validated['image_path'] = Image::store($image, 'adverts');
 
         Advertisement::create($validated);
+        Website::forgetHomepageCache();
 
         return redirect()->route('admin.adverts.index')
             ->with('success', 'Advert created. It is live on the selected placement while active.');
@@ -65,6 +67,7 @@ class AdvertisementController extends Controller
         }
 
         $advert->update($validated);
+        Website::forgetHomepageCache();
 
         return redirect()->route('admin.adverts.index')
             ->with('success', 'Advert updated successfully.');
@@ -73,6 +76,7 @@ class AdvertisementController extends Controller
     public function toggle(Advertisement $advert)
     {
         $advert->update(['is_active' => ! $advert->is_active]);
+        Website::forgetHomepageCache();
 
         return redirect()->route('admin.adverts.index')
             ->with('success', $advert->is_active ? 'Advert is now active.' : 'Advert is now paused.');
@@ -82,6 +86,7 @@ class AdvertisementController extends Controller
     {
         Image::delete($advert->image_path);
         $advert->delete();
+        Website::forgetHomepageCache();
 
         return redirect()->route('admin.adverts.index')
             ->with('success', 'Advert deleted successfully.');

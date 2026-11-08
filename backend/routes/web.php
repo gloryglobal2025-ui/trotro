@@ -19,20 +19,39 @@ use Illuminate\Support\Facades\Storage;
 
 // Serve Flutter web app at /web
 Route::get('/web', function () {
-    return response()->file(public_path('web/index.html'));
+    return response()->file(public_path('web/index.html'), [
+        'Cache-Control' => 'no-cache, must-revalidate',
+    ]);
 });
 
 // Serve static assets for Flutter web app from /web/*
 Route::get('/web/{path}', function ($path) {
     $file = public_path('web/' . $path);
     if (file_exists($file) && !str_starts_with($path, '.')) {
-        return response()->file($file);
+        return response()->file($file, [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
     abort(404);
 })->where('path', '.*');
 
 // Public marketing website. The Flutter app stays at /web.
-Route::get('/', [WebsiteController::class, 'index'])->name('website.home');
+// Served without session/cookie middleware so responses stay edge-cacheable.
+Route::get('/', [WebsiteController::class, 'index'])
+    ->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+    ])
+    ->name('website.home');
+
+Route::get('/sitemap.xml', [WebsiteController::class, 'sitemap'])
+    ->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
+    ])
+    ->name('sitemap');
 
 Route::get('/media/{path}', function (string $path) {
     abort_if(str_contains($path, '..'), 404);

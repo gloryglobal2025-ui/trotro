@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /login
+Disallow: /up
+
+Sitemap: https://trotro.digitalsecuritymarket.com/sitemap.xml

@@ -102,9 +102,40 @@
                 </div>
 
                 <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-slate-900">Hero trust points</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">The three short promises under the hero buttons.</p>
+
+                    <div class="mt-4 space-y-4">
+                        @foreach([1, 2, 3] as $n)
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label class="{{ $label }}" for="hero_point_{{ $n }}_title">Point {{ $n }} title</label>
+                                    <input id="hero_point_{{ $n }}_title" name="hero_point_{{ $n }}_title" type="text" maxlength="60"
+                                           value="{{ $field('hero_point_'.$n.'_title') }}" class="{{ $input }}">
+                                    @error('hero_point_'.$n.'_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label class="{{ $label }}" for="hero_point_{{ $n }}_body">Point {{ $n }} text</label>
+                                    <input id="hero_point_{{ $n }}_body" name="hero_point_{{ $n }}_body" type="text" maxlength="120"
+                                           value="{{ $field('hero_point_'.$n.'_body') }}" class="{{ $input }}">
+                                    @error('hero_point_'.$n.'_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 class="text-sm font-bold text-slate-900">About section</h2>
 
                     <div class="mt-4 space-y-4">
+                        <div>
+                            <label class="{{ $label }}" for="about_eyebrow">Eyebrow label</label>
+                            <input id="about_eyebrow" name="about_eyebrow" type="text" maxlength="60"
+                                   value="{{ $field('about_eyebrow') }}" class="{{ $input }}" placeholder="How it works">
+                            @error('about_eyebrow')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+
                         <div>
                             <label class="{{ $label }}" for="about_title">Heading</label>
                             <input id="about_title" name="about_title" type="text" maxlength="120" required
@@ -118,12 +149,154 @@
                                       class="{{ $input }}">{{ $field('about_body') }}</textarea>
                             @error('about_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
                         </div>
+
+                        <div class="border-t border-slate-100 pt-4">
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Four steps</p>
+                            <div class="mt-3 space-y-3">
+                                @foreach([1, 2, 3, 4] as $n)
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="{{ $label }}" for="step_{{ $n }}_title">Step {{ $n }} title</label>
+                                            <input id="step_{{ $n }}_title" name="step_{{ $n }}_title" type="text" maxlength="80"
+                                                   value="{{ $field('step_'.$n.'_title') }}" class="{{ $input }}">
+                                            @error('step_'.$n.'_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                                        </div>
+                                        <div>
+                                            <label class="{{ $label }}" for="step_{{ $n }}_body">Step {{ $n }} text</label>
+                                            <input id="step_{{ $n }}_body" name="step_{{ $n }}_body" type="text" maxlength="300"
+                                                   value="{{ $field('step_'.$n.'_body') }}" class="{{ $input }}">
+                                            @error('step_'.$n.'_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-slate-900">Popular routes and stops</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">Route cards and stop photos come from your catalogue. This is the copy around them.</p>
+
+                    <div class="mt-4 space-y-4">
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="{{ $label }}" for="routes_eyebrow">Routes eyebrow</label>
+                                <input id="routes_eyebrow" name="routes_eyebrow" type="text" maxlength="60"
+                                       value="{{ $field('routes_eyebrow') }}" class="{{ $input }}">
+                                @error('routes_eyebrow')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label class="{{ $label }}" for="routes_link_label">Routes link label</label>
+                                <input id="routes_link_label" name="routes_link_label" type="text" maxlength="60"
+                                       value="{{ $field('routes_link_label') }}" class="{{ $input }}">
+                                @error('routes_link_label')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="routes_title">Routes heading</label>
+                            <input id="routes_title" name="routes_title" type="text" maxlength="120"
+                                   value="{{ $field('routes_title') }}" class="{{ $input }}">
+                            @error('routes_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+
+                        <div class="grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">
+                            <div>
+                                <label class="{{ $label }}" for="stops_eyebrow">Stops eyebrow</label>
+                                <input id="stops_eyebrow" name="stops_eyebrow" type="text" maxlength="60"
+                                       value="{{ $field('stops_eyebrow') }}" class="{{ $input }}">
+                                @error('stops_eyebrow')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label class="{{ $label }}" for="stops_title">Stops heading</label>
+                                <input id="stops_title" name="stops_title" type="text" maxlength="120"
+                                       value="{{ $field('stops_title') }}" class="{{ $input }}">
+                                @error('stops_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="{{ $label }}" for="stops_body">Stops paragraph</label>
+                                <textarea id="stops_body" name="stops_body" rows="2" maxlength="400"
+                                          class="{{ $input }}">{{ $field('stops_body') }}</textarea>
+                                @error('stops_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-slate-900">Drivers section</h2>
+
+                    <div class="mt-4 space-y-4">
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="{{ $label }}" for="drivers_eyebrow">Eyebrow label</label>
+                                <input id="drivers_eyebrow" name="drivers_eyebrow" type="text" maxlength="60"
+                                       value="{{ $field('drivers_eyebrow') }}" class="{{ $input }}">
+                                @error('drivers_eyebrow')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label class="{{ $label }}" for="drivers_secondary_cta">Second button</label>
+                                <input id="drivers_secondary_cta" name="drivers_secondary_cta" type="text" maxlength="40"
+                                       value="{{ $field('drivers_secondary_cta') }}" class="{{ $input }}">
+                                @error('drivers_secondary_cta')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="drivers_title">Heading</label>
+                            <input id="drivers_title" name="drivers_title" type="text" maxlength="120"
+                                   value="{{ $field('drivers_title') }}" class="{{ $input }}">
+                            @error('drivers_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="drivers_body">Paragraph</label>
+                            <textarea id="drivers_body" name="drivers_body" rows="3" maxlength="400"
+                                      class="{{ $input }}">{{ $field('drivers_body') }}</textarea>
+                            @error('drivers_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+
+                        @foreach([1, 2, 3] as $n)
+                            <div class="grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="{{ $label }}" for="driver_point_{{ $n }}_title">Point {{ $n }} title</label>
+                                    <input id="driver_point_{{ $n }}_title" name="driver_point_{{ $n }}_title" type="text" maxlength="80"
+                                           value="{{ $field('driver_point_'.$n.'_title') }}" class="{{ $input }}">
+                                    @error('driver_point_'.$n.'_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label class="{{ $label }}" for="driver_point_{{ $n }}_body">Point {{ $n }} text</label>
+                                    <input id="driver_point_{{ $n }}_body" name="driver_point_{{ $n }}_body" type="text" maxlength="300"
+                                           value="{{ $field('driver_point_'.$n.'_body') }}" class="{{ $input }}">
+                                    @error('driver_point_'.$n.'_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
                 <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 class="text-sm font-bold text-slate-900">Contact</h2>
-                    <p class="mt-0.5 text-xs text-slate-500">Shown in the contact block and footer. Leave a field empty to hide it.</p>
+                    <p class="mt-0.5 text-xs text-slate-500">Shown in the contact block. Leave a detail empty to hide it.</p>
+
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label class="{{ $label }}" for="contact_eyebrow">Eyebrow label</label>
+                            <input id="contact_eyebrow" name="contact_eyebrow" type="text" maxlength="60"
+                                   value="{{ $field('contact_eyebrow') }}" class="{{ $input }}">
+                            @error('contact_eyebrow')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="contact_title">Heading</label>
+                            <input id="contact_title" name="contact_title" type="text" maxlength="120"
+                                   value="{{ $field('contact_title') }}" class="{{ $input }}">
+                            @error('contact_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="contact_body">Paragraph</label>
+                            <textarea id="contact_body" name="contact_body" rows="3" maxlength="400"
+                                      class="{{ $input }}">{{ $field('contact_body') }}</textarea>
+                            @error('contact_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
 
                     <div class="mt-4 grid gap-4 sm:grid-cols-2">
                         <div>
@@ -143,6 +316,72 @@
                             <input id="contact_address" name="contact_address" type="text" maxlength="255"
                                    value="{{ $field('contact_address') }}" class="{{ $input }}" placeholder="Accra, Ghana">
                             @error('contact_address')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-slate-900">Closing panel</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">The orange panel above the footer that asks visitors to open the app.</p>
+
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label class="{{ $label }}" for="cta_eyebrow">Eyebrow label</label>
+                            <input id="cta_eyebrow" name="cta_eyebrow" type="text" maxlength="60"
+                                   value="{{ $field('cta_eyebrow') }}" class="{{ $input }}">
+                            @error('cta_eyebrow')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="cta_title">Heading</label>
+                            <input id="cta_title" name="cta_title" type="text" maxlength="120"
+                                   value="{{ $field('cta_title') }}" class="{{ $input }}">
+                            @error('cta_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="cta_body">Paragraph</label>
+                            <textarea id="cta_body" name="cta_body" rows="3" maxlength="400"
+                                      class="{{ $input }}">{{ $field('cta_body') }}</textarea>
+                            @error('cta_body')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-slate-900">Search and sharing</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">How the page appears on Google and when someone shares the link.</p>
+
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label class="{{ $label }}" for="meta_title">Search title</label>
+                            <input id="meta_title" name="meta_title" type="text" maxlength="120"
+                                   value="{{ $field('meta_title') }}" class="{{ $input }}"
+                                   placeholder="{{ \App\Helpers\SettingHelper::getAppName() }} — {{ $content['hero_title'] }}">
+                            <p class="mt-1 text-[11px] text-slate-500">Leave empty to use the app name and hero headline.</p>
+                            @error('meta_title')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="meta_description">Search description</label>
+                            <textarea id="meta_description" name="meta_description" rows="3" maxlength="320"
+                                      class="{{ $input }}" placeholder="One sentence shown under the title in search results.">{{ $field('meta_description') }}</textarea>
+                            <p class="mt-1 text-[11px] text-slate-500">Leave empty to use the hero paragraph. Around 155 characters works best.</p>
+                            @error('meta_description')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="{{ $label }}" for="share_image">Social share image</label>
+                            @if($content['share_image_url'])
+                                <div class="mb-2 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2">
+                                    <img src="{{ $content['share_image_url'] }}" alt="Current share image" class="h-16 w-24 rounded-lg object-cover">
+                                    <label class="flex items-center gap-2 text-xs font-medium text-slate-600">
+                                        <input type="checkbox" name="remove_share_image" value="1"
+                                               class="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500">
+                                        Remove image
+                                    </label>
+                                </div>
+                            @endif
+                            <input id="share_image" name="share_image" type="file" accept="image/jpeg,image/png,image/webp"
+                                   class="block w-full cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3.5 py-3 text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-orange-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:border-orange-400">
+                            <p class="mt-1 text-[11px] text-slate-500">Used when the link is shared. If empty, the hero photo is used. Landscape 1200×630 is ideal.</p>
+                            @error('share_image')<p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>@enderror
                         </div>
                     </div>
                 </div>
